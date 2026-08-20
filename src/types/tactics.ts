@@ -2,6 +2,8 @@ export type MatchFormat = '5v5' | '7v7' | '9v9' | '11v11';
 
 export type TeamId = 'home' | 'away' | 'neutral' | 'equipment';
 
+export type MarkingSize = 'small' | 'medium' | 'large';
+
 export interface Point {
   x: number;
   y: number;
@@ -78,6 +80,7 @@ export interface Annotation {
   fillColor?: string;
   fillOpacity?: number;
   selected?: boolean;
+  size?: MarkingSize;
 }
 
 export interface KeyframeStep {

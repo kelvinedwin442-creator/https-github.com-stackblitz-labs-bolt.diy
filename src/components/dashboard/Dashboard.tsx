@@ -7,17 +7,14 @@ import {
   Trash2,
   Download,
   Upload,
-  Layers,
   Sparkles,
   Play,
-  Clock,
-  Shield,
   Search,
-  Filter,
-  Activity,
-  Award,
   ChevronRight,
   BookOpen,
+  MousePointer,
+  ArrowRight,
+  Maximize2,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -113,7 +110,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   Tactical Coach
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 font-semibold">
-                  PRO STUDIO
+                  STUDIO
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 hidden sm:block">
@@ -123,26 +120,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* Quick Header Actions */}
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => {
-                const a = document.createElement('a');
-                a.href = '/tactical_coach_preview.html';
-                a.download = 'Tactical_Coach_Offline_App.html';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-              }}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 text-xs font-semibold shadow-sm transition-all"
-              title="Download standalone offline HTML app"
-            >
-              <Download className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Download App (.html)</span>
-            </button>
-
+          <div className="flex items-center gap-2">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-medium transition-colors"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-medium transition-colors"
             >
               <Upload className="w-3.5 h-3.5" />
               <span>Import JSON</span>
@@ -150,14 +131,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <button
               onClick={onExportAll}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-medium transition-colors"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-medium transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Backup All</span>
             </button>
 
             <button
-              onClick={() => onCreateNewSession('11v11', 'Match Tactical Plan')}
+              onClick={() => onCreateNewSession('11v11', '11v11 Tactical Plan')}
               className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-glow-green transition-all"
             >
               <Plus className="w-4 h-4" />
@@ -177,38 +158,93 @@ export const Dashboard: React.FC<DashboardProps> = ({
       />
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col gap-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col gap-6">
+        {/* Simple 4-Step Coaching Workflow Banner */}
+        <div className="bg-slate-900/60 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-tactical">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                Coaching Workflow
+              </span>
+              <h2 className="text-base sm:text-lg font-bold text-white mt-0.5">
+                Simple 4-Step Tactical Design System
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 flex-1 max-w-2xl">
+              <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-emerald-950 text-emerald-400 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0">
+                  1
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-200">Set Up Tactic</div>
+                  <div className="text-[10px] text-slate-400">Format & Players</div>
+                </div>
+              </div>
+
+              <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-emerald-950 text-emerald-400 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0">
+                  2
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-200">Add Movements</div>
+                  <div className="text-[10px] text-slate-400">Passes & Runs</div>
+                </div>
+              </div>
+
+              <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-emerald-950 text-emerald-400 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0">
+                  3
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-200">Animate Sequence</div>
+                  <div className="text-[10px] text-slate-400">Multi-Step Moves</div>
+                </div>
+              </div>
+
+              <div className="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-indigo-950 text-indigo-400 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0">
+                  4
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-200">Present to Team</div>
+                  <div className="text-[10px] text-slate-400">Fullscreen & Laser</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Quick Launch Format Presets */}
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-400" /> Quick Session Builder
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-400" /> Start New Tactical Board
               </h2>
-              <p className="text-xs text-slate-400">Choose match format to launch workspace with preset formations</p>
+              <p className="text-xs text-slate-400">Choose match format to open the interactive pitch immediately</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { format: '11v11' as MatchFormat, title: '11v11 Senior Match', desc: '4-3-3 vs 4-2-3-1 Game Model', color: 'from-emerald-900/40 to-slate-900', border: 'border-emerald-500/30' },
-              { format: '9v9' as MatchFormat, title: '9v9 Development', desc: '3-2-3 Positional Play & Spacing', color: 'from-blue-900/40 to-slate-900', border: 'border-blue-500/30' },
-              { format: '7v7' as MatchFormat, title: '7v7 Academy', desc: '2-3-1 Build-Up & Third Man', color: 'from-amber-900/40 to-slate-900', border: 'border-amber-500/30' },
-              { format: '5v5' as MatchFormat, title: '5v5 / Futsal', desc: '1-2-1 Diamond & Rotations', color: 'from-purple-900/40 to-slate-900', border: 'border-purple-500/30' },
+              { format: '11v11' as MatchFormat, title: '11v11 Match Plan', desc: 'Full pitch tactical system', color: 'from-emerald-900/40 to-slate-900', border: 'border-emerald-500/30' },
+              { format: '9v9' as MatchFormat, title: '9v9 Development', desc: 'Youth positional play', color: 'from-blue-900/40 to-slate-900', border: 'border-blue-500/30' },
+              { format: '7v7' as MatchFormat, title: '7v7 Academy', desc: '2-3-1 build-up routines', color: 'from-amber-900/40 to-slate-900', border: 'border-amber-500/30' },
+              { format: '5v5' as MatchFormat, title: '5v5 / Futsal', desc: 'Diamond rotations & drills', color: 'from-purple-900/40 to-slate-900', border: 'border-purple-500/30' },
             ].map((preset) => (
               <button
                 key={preset.format}
                 onClick={() => onCreateNewSession(preset.format, `${preset.format} Tactical Plan`)}
-                className={`p-4 rounded-2xl bg-gradient-to-b ${preset.color} border ${preset.border} hover:scale-[1.02] hover:border-white/40 transition-all text-left flex flex-col justify-between group shadow-tactical`}
+                className={`p-3.5 rounded-2xl bg-gradient-to-b ${preset.color} border ${preset.border} hover:scale-[1.02] hover:border-white/40 transition-all text-left flex flex-col justify-between group shadow-tactical`}
               >
                 <div>
-                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 inline-block mb-2">
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 inline-block mb-1.5">
                     {preset.format}
                   </span>
                   <h3 className="font-bold text-sm text-white group-hover:text-emerald-300 transition-colors">
                     {preset.title}
                   </h3>
-                  <p className="text-[11px] text-slate-400 mt-1">{preset.desc}</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{preset.desc}</p>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-xs font-semibold text-emerald-400 pt-2 border-t border-slate-800/80">
                   <span>Open Pitch</span>
@@ -219,13 +255,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Sessions Workspace & Filter Bar */}
+        {/* Saved Sessions Grid */}
         <div>
           {/* Header & Filters */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <FolderOpen className="w-4 h-4 text-emerald-400" /> Saved Tactical Sessions
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <FolderOpen className="w-4 h-4 text-emerald-400" /> Saved Sessions
               </h2>
               <p className="text-xs text-slate-400">
                 {filteredSessions.length} {filteredSessions.length === 1 ? 'session' : 'sessions'} stored offline on this device
@@ -234,19 +270,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             {/* Search & Filter Controls */}
             <div className="flex flex-wrap items-center gap-2">
-              {/* Search Bar */}
-              <div className="relative flex-1 sm:w-60">
+              <div className="relative flex-1 sm:w-56">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search sessions or teams..."
+                  placeholder="Search sessions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:ring-1 focus:ring-emerald-500 outline-none"
                 />
               </div>
 
-              {/* Format Filter */}
               <select
                 value={selectedFormat}
                 onChange={(e) => setSelectedFormat(e.target.value)}
@@ -259,13 +293,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <option value="5v5">5v5</option>
               </select>
 
-              {/* Phase Filter */}
               <select
                 value={selectedPhase}
                 onChange={(e) => setSelectedPhase(e.target.value)}
                 className="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 outline-none focus:ring-1 focus:ring-emerald-500"
               >
-                <option value="all">All Tactical Phases</option>
+                <option value="all">All Phases</option>
                 <option value="possession">In Possession</option>
                 <option value="out-of-possession">Out of Possession</option>
                 <option value="transition-attack">Transition (Att)</option>
@@ -278,7 +311,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Sessions Grid */}
           {filteredSessions.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
               {filteredSessions.map((session) => {
                 const phaseBadge = getPhaseBadge(session.phase);
                 const stepCount = session.steps?.length || 1;
@@ -287,11 +320,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 return (
                   <div
                     key={session.id}
-                    className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-4.5 flex flex-col justify-between shadow-tactical transition-all hover:shadow-2xl group relative"
+                    className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 flex flex-col justify-between shadow-tactical transition-all hover:shadow-2xl group relative"
                   >
-                    {/* Top Meta */}
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-2.5">
+                      <div className="flex items-center justify-between gap-2 mb-2">
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-800 text-emerald-400 border border-slate-700/80">
                             {session.format}
@@ -310,7 +342,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         )}
                       </div>
 
-                      {/* Title & Description */}
                       <h3
                         onClick={() => onOpenSession(session.id)}
                         className="font-bold text-base text-white group-hover:text-emerald-400 cursor-pointer transition-colors line-clamp-1"
@@ -321,50 +352,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         {session.description || 'No description provided.'}
                       </p>
 
-                      {/* Teams & Formation Badges */}
-                      <div className="flex items-center gap-2 mt-3.5 text-[11px] text-slate-300">
-                        <div className="flex items-center gap-1.5 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800">
+                      <div className="flex items-center gap-2 mt-3 text-[11px] text-slate-300">
+                        <div className="flex items-center gap-1.5 bg-slate-950/80 px-2 py-1 rounded-lg border border-slate-800 truncate">
                           <div
-                            className="w-2.5 h-2.5 rounded-full"
+                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                             style={{ backgroundColor: session.homeTeam.primaryColor }}
                           />
-                          <span className="font-medium truncate max-w-[90px]">
+                          <span className="font-medium truncate max-w-[80px]">
                             {session.homeTeam.name}
-                          </span>
-                          <span className="font-mono text-[10px] text-slate-500">
-                            ({session.homeTeam.formation})
                           </span>
                         </div>
                         <span className="text-slate-600 text-xs font-bold">vs</span>
-                        <div className="flex items-center gap-1.5 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800">
+                        <div className="flex items-center gap-1.5 bg-slate-950/80 px-2 py-1 rounded-lg border border-slate-800 truncate">
                           <div
-                            className="w-2.5 h-2.5 rounded-full"
+                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                             style={{ backgroundColor: session.awayTeam.primaryColor }}
                           />
-                          <span className="font-medium truncate max-w-[90px]">
+                          <span className="font-medium truncate max-w-[80px]">
                             {session.awayTeam.name}
-                          </span>
-                          <span className="font-mono text-[10px] text-slate-500">
-                            ({session.awayTeam.formation})
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Footer Info & Actions */}
-                    <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-[10px] text-slate-400 font-mono">
-                        <span className="flex items-center gap-1">
-                          <Activity className="w-3 h-3 text-emerald-400" />
-                          {stepCount} {stepCount === 1 ? 'Step' : 'Steps'}
-                        </span>
+                    <div className="mt-3.5 pt-2.5 border-t border-slate-800/80 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                        <span>{stepCount} {stepCount === 1 ? 'Step' : 'Steps'}</span>
                         <span>•</span>
                         <span>{playerCount} Players</span>
                         <span>•</span>
                         <span>{formatRelativeDate(session.updatedAt)}</span>
                       </div>
 
-                      {/* Action Buttons */}
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => onDuplicateSession(session.id)}
@@ -389,7 +408,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         </button>
                         <button
                           onClick={() => onOpenSession(session.id)}
-                          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all"
+                          className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all"
                         >
                           <span>Open</span>
                           <Play className="w-3 h-3 fill-white" />
@@ -401,14 +420,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               })}
             </div>
           ) : (
-            /* Empty State */
-            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-12 text-center flex flex-col items-center justify-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-400">
-                <Search className="w-6 h-6" />
+            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-2">
+              <div className="w-12 h-12 rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-400">
+                <Search className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-white text-base">No Tactical Sessions Found</h3>
+              <h3 className="font-bold text-white text-sm">No Tactical Sessions Found</h3>
               <p className="text-xs text-slate-400 max-w-sm">
-                No sessions matched your search or filters. Create a new session or clear filters to view all sessions.
+                No sessions matched your search. Clear filters to view all sessions.
               </p>
               <button
                 onClick={() => {
@@ -416,52 +434,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   setSelectedFormat('all');
                   setSelectedPhase('all');
                 }}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold mt-2"
+                className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold mt-1"
               >
                 Reset Filters
               </button>
             </div>
           )}
         </div>
-
-        {/* Tactical Reference Guide / Coaching Cheat Sheet */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-tactical">
-          <div className="flex items-center gap-2 mb-3">
-            <BookOpen className="w-4 h-4 text-emerald-400" />
-            <h3 className="font-bold text-sm text-white">Tactical Coaching Principles & Space Terminology</h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-              <span className="font-bold text-emerald-400 block mb-1">Half-Spaces (Zwischenräume)</span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Vertical corridors between the center and wings. Prime zones for progressive diagonal passes, third-man combinations, and diagonal crosses.
-              </p>
-            </div>
-            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-              <span className="font-bold text-amber-400 block mb-1">Zone 14 (Central Danger Pocket)</span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                The central attacking space just outside the opponent 18-yard box. Highest statistical probability of generating shots on target and assists.
-              </p>
-            </div>
-            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-              <span className="font-bold text-blue-400 block mb-1">Rest Defense & Rest Offense</span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Positional structure of non-attacking players during possession (e.g. 3-2 or 2-3 rest defense) to immediately counter-press and prevent breaks.
-              </p>
-            </div>
-            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-              <span className="font-bold text-red-400 block mb-1">Pressing Triggers & Cover Shadow</span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Cues that trigger coordinated pressing: backward pass, closed body shape, poor touch, or pass into full-back on the touchline.
-              </p>
-            </div>
-          </div>
-        </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-4 px-6 text-center text-slate-500 text-xs">
-        Tactical Coach • Football Coaching & Tactical Teaching Workspace • Offline-Ready
+      <footer className="border-t border-slate-800/80 py-3.5 px-6 text-center text-slate-500 text-xs">
+        Tactical Coach • Professional Football Coaching & Tactical Workspace
       </footer>
     </div>
   );

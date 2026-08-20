@@ -32,8 +32,8 @@ export const PlayerMarker: React.FC<PlayerMarkerProps> = ({
   const textColor = player.textColor || (isGK ? teamConfig.gkTextColor : teamConfig.textColor);
   const rotation = player.rotation ?? (player.team === 'home' ? 0 : 180);
 
-  // Marker radius
-  const radius = 2.4;
+  // Balanced marker radius
+  const radius = 2.3;
 
   return (
     <g
@@ -44,54 +44,63 @@ export const PlayerMarker: React.FC<PlayerMarkerProps> = ({
       onDoubleClick={() => onDoubleClick && onDoubleClick(player)}
       style={{ touchAction: 'none' }}
     >
+      {/* Invisible Touch Area for easy mobile grabbing */}
+      <circle
+        cx="0"
+        cy="0"
+        r={radius + 2.2}
+        fill="transparent"
+        className="cursor-pointer"
+      />
+
       {/* Vision Cone if enabled */}
       {(showVisionCones || player.coneVisible) && (
         <path
-          d={generateVisionCone(0, 0, rotation, 14, 50)}
+          d={generateVisionCone(0, 0, rotation, 12, 45)}
           fill={fillColor}
-          fillOpacity={0.16}
+          fillOpacity={0.14}
           stroke={fillColor}
-          strokeWidth={0.3}
-          strokeDasharray="1,1"
+          strokeWidth={0.25}
+          strokeDasharray="0.8,0.8"
           className="pointer-events-none"
         />
       )}
 
-      {/* Selected Halo / Glow */}
+      {/* Selected Halo */}
       {isSelected && (
         <circle
           cx="0"
           cy="0"
-          r={radius + 1.2}
+          r={radius + 1.0}
           fill="none"
           stroke="#38bdf8"
-          strokeWidth="0.8"
-          strokeDasharray="1.5,1"
+          strokeWidth="0.6"
+          strokeDasharray="1.2,0.8"
           className="animate-pulse"
         />
       )}
 
-      {/* Drop Shadow for realistic depth */}
+      {/* Realistic Soft Shadow */}
       <circle
-        cx="0.3"
-        cy="0.5"
+        cx="0.2"
+        cy="0.35"
         r={radius}
-        fill="rgba(0, 0, 0, 0.4)"
+        fill="rgba(0, 0, 0, 0.35)"
         className="pointer-events-none"
       />
 
-      {/* Main Jersey Circle */}
+      {/* Main Player Disc */}
       <circle
         cx="0"
         cy="0"
         r={radius}
         fill={fillColor}
-        stroke={isGK ? '#ffffff' : '#ffffff'}
-        strokeWidth={isGK ? '0.6' : '0.5'}
-        className="transition-transform duration-75 hover:scale-110"
+        stroke="#ffffff"
+        strokeWidth={isGK ? '0.55' : '0.45'}
+        className="transition-transform duration-75 hover:scale-105"
       />
 
-      {/* GK Gloves Indicator Ring if Goalkeeper */}
+      {/* GK Indicator Ring */}
       {isGK && (
         <circle
           cx="0"
@@ -99,18 +108,18 @@ export const PlayerMarker: React.FC<PlayerMarkerProps> = ({
           r={radius - 0.5}
           fill="none"
           stroke="#000000"
-          strokeWidth="0.3"
-          strokeDasharray="0.8,0.8"
+          strokeWidth="0.25"
+          strokeDasharray="0.6,0.6"
         />
       )}
 
-      {/* Direction Pointer Tick (small triangle showing facing orientation) */}
+      {/* Direction Pointer Tick */}
       <polygon
-        points="0,-2.6 0.8,-3.4 -0.8,-3.4"
+        points="0,-2.5 0.6,-3.1 -0.6,-3.1"
         fill="#ffffff"
         transform={`rotate(${rotation + 90})`}
-        stroke="rgba(0,0,0,0.5)"
-        strokeWidth="0.2"
+        stroke="rgba(0,0,0,0.4)"
+        strokeWidth="0.15"
         className="pointer-events-none"
       />
 
@@ -118,9 +127,9 @@ export const PlayerMarker: React.FC<PlayerMarkerProps> = ({
       {showNumbers && (
         <text
           x="0"
-          y="0.8"
+          y="0.75"
           fill={textColor}
-          fontSize="2.1"
+          fontSize="1.9"
           fontWeight="800"
           textAnchor="middle"
           dominantBaseline="central"
@@ -133,22 +142,22 @@ export const PlayerMarker: React.FC<PlayerMarkerProps> = ({
 
       {/* Name / Role Badge Below Player */}
       {showLabels && (player.name || player.role) && (
-        <g transform="translate(0, 3.8)" className="pointer-events-none select-none">
+        <g transform="translate(0, 3.5)" className="pointer-events-none select-none">
           <rect
-            x="-7"
-            y="-1.3"
-            width="14"
-            height="2.8"
-            rx="1.4"
-            fill="rgba(15, 23, 42, 0.88)"
-            stroke="rgba(255, 255, 255, 0.25)"
+            x="-5.5"
+            y="-1.1"
+            width="11"
+            height="2.2"
+            rx="1.1"
+            fill="rgba(15, 23, 42, 0.9)"
+            stroke="rgba(255, 255, 255, 0.2)"
             strokeWidth="0.2"
           />
           <text
             x="0"
-            y="0.3"
+            y="0.2"
             fill="#ffffff"
-            fontSize="1.6"
+            fontSize="1.3"
             fontWeight="600"
             textAnchor="middle"
             dominantBaseline="central"

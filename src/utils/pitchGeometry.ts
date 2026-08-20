@@ -1,3 +1,5 @@
+import { MarkingSize } from '../types/tactics';
+
 export interface Point {
   x: number;
   y: number;
@@ -11,10 +13,41 @@ export function angle(p1: Point, p2: Point): number {
   return Math.atan2(p2.y - p1.y, p2.x - p1.x);
 }
 
+export function getStrokeWidthForSize(size: MarkingSize = 'small'): number {
+  switch (size) {
+    case 'large':
+      return 2.0;
+    case 'medium':
+      return 1.4;
+    case 'small':
+    default:
+      return 0.9;
+  }
+}
+
+export function getFontSizeForSize(size: MarkingSize = 'small'): number {
+  switch (size) {
+    case 'large':
+      return 1.8;
+    case 'medium':
+      return 1.4;
+    case 'small':
+    default:
+      return 1.1;
+  }
+}
+
 /**
- * Generates an SVG path string for a wavy / zig-zag dribbling line
+ * Generates an SVG path string for a wavy / zig-zag dribbling line with subtle amplitude
  */
-export function generateWavyPath(start: Point, end: Point, wavelength = 3, amplitude = 1.2): string {
+export function generateWavyPath(
+  start: Point,
+  end: Point,
+  size: MarkingSize = 'small'
+): string {
+  const amplitude = size === 'large' ? 1.1 : size === 'medium' ? 0.85 : 0.65;
+  const wavelength = size === 'large' ? 3.5 : size === 'medium' ? 3.0 : 2.5;
+
   const dist = distance(start, end);
   if (dist < 1) return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
 
@@ -63,12 +96,10 @@ export function generateCurvedPath(points: Point[]): string {
   if (points.length === 2) return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
 
   if (points.length === 3) {
-    // Quadratic bezier with middle point as control
     const [p0, p1, p2] = points;
     return `M ${p0.x} ${p0.y} Q ${p1.x} ${p1.y} ${p2.x} ${p2.y}`;
   }
 
-  // Smooth Catmull-Rom or cubic spline
   let d = `M ${points[0].x} ${points[0].y}`;
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = i > 0 ? points[i - 1] : points[i];
@@ -90,23 +121,20 @@ export function generateCurvedPath(points: Point[]): string {
 /**
  * Generates vision cone SVG path for a player facing a specific direction
  */
-export function generateVisionCone(x: number, y: number, angleDeg: number, length = 12, fovDeg = 55): string {
+export function generateVisionCone(x: number, y: number, angleDeg: number, length = 11, fovDeg = 50): string {
   const rad = (angleDeg * Math.PI) / 180;
   const halfFov = ((fovDeg / 2) * Math.PI) / 180;
 
   const leftAngle = rad - halfFov;
   const rightAngle = rad + halfFov;
 
-  // Aspect ratio adjustment (assuming pitch is roughly 100 wide x 68 high in real meters)
-  const aspect = 1.0; 
-
   const x1 = x + Math.cos(leftAngle) * length;
-  const y1 = y + Math.sin(leftAngle) * length * aspect;
+  const y1 = y + Math.sin(leftAngle) * length;
 
   const x2 = x + Math.cos(rightAngle) * length;
-  const y2 = y + Math.sin(rightAngle) * length * aspect;
+  const y2 = y + Math.sin(rightAngle) * length;
 
-  return `M ${x} ${y} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${length} ${length * aspect} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
+  return `M ${x} ${y} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${length} ${length} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
 }
 
 /**

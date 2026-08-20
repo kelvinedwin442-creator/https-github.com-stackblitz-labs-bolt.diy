@@ -13,8 +13,6 @@ import {
   Repeat,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  Sliders,
   Edit2,
   Check,
 } from 'lucide-react';
@@ -23,7 +21,7 @@ interface AnimationTimelineProps {
   steps: KeyframeStep[];
   currentStepIndex: number;
   isPlaying: boolean;
-  playbackProgress: number; // 0 to 1 across current step or total
+  playbackProgress: number;
   playbackSpeed: number;
   isLooping: boolean;
   onPlay: () => void;
@@ -64,7 +62,6 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
   onChangeSpeed,
   onToggleLoop,
   onOpenPresentation,
-  onScrubTimeline,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingTitle, setEditingTitle] = useState('');
@@ -84,31 +81,31 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/98 backdrop-blur-md border border-slate-800 rounded-xl p-3 shadow-tactical flex flex-col gap-2.5 text-xs text-slate-100">
+    <div className="bg-slate-900/98 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 shadow-tactical flex flex-col gap-2 text-xs text-slate-100">
       {/* Top Row: Playback Controls, Step Title, Speed & Presentation */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
         {/* Play/Pause & Step Navigation */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
             onClick={onRestart}
             title="Restart to Step 1"
             className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={onStepPrev}
             disabled={currentStepIndex === 0}
-            title="Previous Step (Left Arrow)"
-            className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            title="Previous Step"
+            className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-30 transition-colors"
           >
-            <SkipBack className="w-4 h-4" />
+            <SkipBack className="w-3.5 h-3.5" />
           </button>
 
           {/* Primary Play/Pause Button */}
           <button
             onClick={isPlaying ? onPause : onPlay}
-            title={isPlaying ? 'Pause (Space)' : 'Play Sequence (Space)'}
+            title={isPlaying ? 'Pause Sequence (Space)' : 'Play Sequence (Space)'}
             className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all shadow-md ${
               isPlaying
                 ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-glow-yellow'
@@ -117,13 +114,13 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
           >
             {isPlaying ? (
               <>
-                <Pause className="w-4 h-4 fill-white" />
+                <Pause className="w-3.5 h-3.5 fill-white" />
                 <span>Pause</span>
               </>
             ) : (
               <>
-                <Play className="w-4 h-4 fill-white" />
-                <span>Play</span>
+                <Play className="w-3.5 h-3.5 fill-white" />
+                <span>Play Movement</span>
               </>
             )}
           </button>
@@ -131,30 +128,30 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
           <button
             onClick={onStepNext}
             disabled={currentStepIndex === steps.length - 1}
-            title="Next Step (Right Arrow)"
-            className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            title="Next Step"
+            className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-30 transition-colors"
           >
-            <SkipForward className="w-4 h-4" />
+            <SkipForward className="w-3.5 h-3.5" />
           </button>
 
           {/* Loop toggle */}
           <button
             onClick={onToggleLoop}
-            title="Toggle Loop"
+            title="Toggle Continuous Loop"
             className={`p-1.5 rounded-lg border transition-all ${
               isLooping
                 ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300'
                 : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white'
             }`}
           >
-            <Repeat className="w-3.5 h-3.5" />
+            <Repeat className="w-3 h-3" />
           </button>
         </div>
 
-        {/* Center: Current Step Title / Description */}
-        <div className="flex-1 min-w-[200px] max-w-md px-2 flex items-center justify-between bg-slate-950/60 py-1 px-2.5 rounded-lg border border-slate-800">
+        {/* Center: Current Step Title */}
+        <div className="flex-1 min-w-[160px] max-w-sm px-2 flex items-center justify-between bg-slate-950/70 py-1 px-2.5 rounded-lg border border-slate-800">
           {isEditingName ? (
-            <div className="flex items-center gap-2 w-full">
+            <div className="flex items-center gap-1.5 w-full">
               <input
                 type="text"
                 value={editingTitle}
@@ -166,7 +163,7 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
                 onClick={handleSaveEdit}
                 className="p-1 rounded bg-emerald-600 text-white hover:bg-emerald-500"
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-3 h-3" />
               </button>
             </div>
           ) : (
@@ -176,14 +173,15 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
                   {currentStep.name}
                 </span>
                 {currentStep.description && (
-                  <span className="hidden sm:inline text-slate-400 text-[11px] ml-2">
+                  <span className="hidden sm:inline text-slate-400 text-[10px] ml-2">
                     — {currentStep.description}
                   </span>
                 )}
               </div>
               <button
                 onClick={handleStartEdit}
-                className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 ml-1.5 flex-shrink-0"
+                className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 ml-1 flex-shrink-0"
+                title="Rename step"
               >
                 <Edit2 className="w-3 h-3" />
               </button>
@@ -191,17 +189,17 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
           )}
         </div>
 
-        {/* Right: Speed Selector & Fullscreen Presentation */}
-        <div className="flex items-center gap-2">
+        {/* Right: Speed & Add Step */}
+        <div className="flex items-center gap-1.5">
           {/* Speed Buttons */}
-          <div className="flex items-center bg-slate-800/80 rounded-lg p-0.5 border border-slate-700/60">
-            {[0.5, 1, 1.5, 2].map((s) => (
+          <div className="flex items-center bg-slate-950/80 rounded-lg p-0.5 border border-slate-800">
+            {[0.5, 1, 1.5].map((s) => (
               <button
                 key={s}
                 onClick={() => onChangeSpeed(s)}
-                className={`px-1.5 py-0.5 rounded font-mono text-[10px] ${
+                className={`px-1.5 py-0.5 rounded font-mono text-[10px] font-bold ${
                   playbackSpeed === s
-                    ? 'bg-emerald-600 text-white font-bold'
+                    ? 'bg-emerald-600 text-white'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -210,23 +208,24 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
             ))}
           </div>
 
-          {/* Presentation Mode Button */}
+          {/* Quick Present */}
           <button
             onClick={onOpenPresentation}
-            className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+            className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition-all"
+            title="Present Fullscreen"
           >
-            <Maximize2 className="w-3.5 h-3.5" />
+            <Maximize2 className="w-3 h-3" />
             <span className="hidden sm:inline">Present</span>
           </button>
         </div>
       </div>
 
-      {/* Middle Row: Continuous Timeline Scrubber Bar */}
+      {/* Middle Row: Scrubber Timeline Bar */}
       <div className="flex items-center gap-2 pt-0.5">
         <span className="text-[10px] font-mono text-slate-400 w-12 text-right">
           Step {currentStepIndex + 1}/{steps.length}
         </span>
-        <div className="flex-1 relative h-2 bg-slate-800 rounded-full overflow-hidden cursor-pointer">
+        <div className="flex-1 relative h-1.5 bg-slate-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all duration-75"
             style={{
@@ -241,37 +240,32 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
         </span>
       </div>
 
-      {/* Bottom Row: Step Thumbnails & Keyframe Manager */}
-      <div className="flex items-center gap-2 overflow-x-auto py-1">
+      {/* Bottom Row: Step Thumbnails */}
+      <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
         {steps.map((step, idx) => {
           const isSelected = idx === currentStepIndex;
           return (
             <div
               key={step.id}
               onClick={() => onStepSelect(idx)}
-              className={`flex-shrink-0 cursor-pointer rounded-lg px-2.5 py-1.5 border transition-all flex items-center gap-2 group ${
+              className={`flex-shrink-0 cursor-pointer rounded-lg px-2 py-1 border transition-all flex items-center gap-1.5 ${
                 isSelected
-                  ? 'bg-emerald-950/70 border-emerald-500 text-white shadow-glow-green'
+                  ? 'bg-emerald-950/80 border-emerald-500 text-white shadow-glow-green'
                   : 'bg-slate-800/80 border-slate-700/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
               }`}
             >
               <div
-                className={`w-5 h-5 rounded-full flex items-center justify-center font-mono font-bold text-[10px] ${
+                className={`w-4 h-4 rounded-full flex items-center justify-center font-mono font-bold text-[9px] ${
                   isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-slate-700 text-slate-300'
                 }`}
               >
                 {idx + 1}
               </div>
-              <div className="text-left">
-                <div className="font-semibold text-xs truncate max-w-[120px]">
-                  {step.name}
-                </div>
-                <div className="text-[9px] text-slate-400 font-mono">
-                  {step.duration}s • {step.players.length} players
-                </div>
-              </div>
+              <span className="font-semibold text-xs truncate max-w-[90px]">
+                {step.name}
+              </span>
 
-              {/* Step Quick Actions on Hover / Active */}
+              {/* Step Quick Actions */}
               {isSelected && steps.length > 1 && (
                 <div className="flex items-center gap-0.5 ml-1 pl-1 border-l border-slate-700">
                   {idx > 0 && (
@@ -280,10 +274,10 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
                         e.stopPropagation();
                         onMoveStep(idx, idx - 1);
                       }}
-                      title="Move step left"
-                      className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white"
+                      title="Move left"
+                      className="p-0.5 hover:bg-slate-700 rounded text-slate-400 hover:text-white"
                     >
-                      <ChevronLeft className="w-3 h-3" />
+                      <ChevronLeft className="w-2.5 h-2.5" />
                     </button>
                   )}
                   {idx < steps.length - 1 && (
@@ -292,10 +286,10 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
                         e.stopPropagation();
                         onMoveStep(idx, idx + 1);
                       }}
-                      title="Move step right"
-                      className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white"
+                      title="Move right"
+                      className="p-0.5 hover:bg-slate-700 rounded text-slate-400 hover:text-white"
                     >
-                      <ChevronRight className="w-3 h-3" />
+                      <ChevronRight className="w-2.5 h-2.5" />
                     </button>
                   )}
                   <button
@@ -303,10 +297,10 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
                       e.stopPropagation();
                       onDuplicateStep(idx);
                     }}
-                    title="Duplicate this step"
-                    className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white"
+                    title="Duplicate step"
+                    className="p-0.5 hover:bg-slate-700 rounded text-slate-400 hover:text-white"
                   >
-                    <Copy className="w-3 h-3" />
+                    <Copy className="w-2.5 h-2.5" />
                   </button>
                   <button
                     onClick={(e) => {
@@ -314,9 +308,9 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
                       onDeleteStep(idx);
                     }}
                     title="Delete step"
-                    className="p-1 hover:bg-red-900/60 rounded text-red-400 hover:text-red-300"
+                    className="p-0.5 hover:bg-red-900/60 rounded text-red-400 hover:text-red-300"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <Trash2 className="w-2.5 h-2.5" />
                   </button>
                 </div>
               )}
@@ -327,10 +321,11 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
         {/* Add Step Button */}
         <button
           onClick={onAddStep}
-          className="flex-shrink-0 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-dashed border-slate-600 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all text-xs font-semibold"
+          className="flex-shrink-0 px-2.5 py-1 rounded-lg bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-500/50 text-emerald-300 flex items-center gap-1 transition-all text-xs font-bold"
+          title="Add Next Tactical Movement Step"
         >
           <Plus className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Add Step</span>
+          <span>+ Next Step</span>
         </button>
       </div>
     </div>

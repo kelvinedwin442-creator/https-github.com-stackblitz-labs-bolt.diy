@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Annotation, AnnotationType, DrawingTool } from '../../types/tactics';
-import { generateCurvedPath, generateWavyPath, Point } from '../../utils/pitchGeometry';
+import { Annotation, AnnotationType, DrawingTool, MarkingSize } from '../../types/tactics';
+import {
+  generateCurvedPath,
+  generateWavyPath,
+  Point,
+  getStrokeWidthForSize,
+} from '../../utils/pitchGeometry';
 
 interface DrawingLayerProps {
   activeTool: DrawingTool;
   drawingColor: string;
-  strokeWidth: number;
+  markingSize: MarkingSize;
   drawingStyle: 'solid' | 'dashed' | 'dotted' | 'wavy';
   activeZoneText: string;
   onAddAnnotation: (ann: Annotation) => void;
@@ -15,7 +20,7 @@ interface DrawingLayerProps {
 export const DrawingLayer: React.FC<DrawingLayerProps> = ({
   activeTool,
   drawingColor,
-  strokeWidth,
+  markingSize,
   drawingStyle,
   activeZoneText,
   onAddAnnotation,
@@ -24,6 +29,8 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
   const [laserPoints, setLaserPoints] = useState<{ x: number; y: number; time: number }[]>([]);
+
+  const strokeWidth = getStrokeWidthForSize(markingSize);
 
   // Laser decay ticker
   useEffect(() => {
@@ -62,16 +69,17 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
     }
 
     if (activeTool === 'text') {
-      const textNote = window.prompt('Enter tactical note / label:', activeZoneText || 'Pressing Trigger');
+      const textNote = window.prompt('Enter tactical note / label:', activeZoneText || 'Run trigger');
       if (textNote) {
         onAddAnnotation({
           id: `ann-${Date.now()}`,
           type: 'text',
           points: [coords],
           color: drawingColor,
-          strokeWidth: 2,
+          strokeWidth,
           style: 'solid',
           text: textNote,
+          size: markingSize,
         });
       }
       return;
@@ -94,7 +102,6 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
     if (activeTool === 'freehand') {
       setCurrentPoints((prev) => [...prev, coords]);
     } else {
-      // 2-point or 3-point tools
       setCurrentPoints((prev) => {
         if (prev.length === 0) return [coords];
         if (activeTool === 'curved-run' && prev.length === 2) {
@@ -109,9 +116,7 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
     if (!isDrawing) return;
     setIsDrawing(false);
 
-    if (activeTool === 'laser') {
-      return;
-    }
+    if (activeTool === 'laser') return;
 
     if (currentPoints.length < 2) {
       setCurrentPoints([]);
@@ -156,7 +161,8 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
       style,
       text: activeZoneText || undefined,
       fillColor: drawingColor,
-      fillOpacity: 0.18,
+      fillOpacity: 0.12,
+      size: markingSize,
     });
 
     setCurrentPoints([]);
@@ -165,9 +171,9 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
   const colorId = (drawingColor || '#ffffff').replace('#', '');
   const dashArray =
     drawingStyle === 'dashed'
-      ? '3,2'
+      ? '2.2,1.5'
       : drawingStyle === 'dotted'
-      ? '1,1.5'
+      ? '0.8,1.2'
       : undefined;
 
   const renderLivePreview = () => {
@@ -185,7 +191,7 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
             y2={p2.y}
             stroke={drawingColor}
             strokeWidth={strokeWidth}
-            strokeDasharray="2,1.5"
+            strokeDasharray="1.8,1.2"
             markerEnd={`url(#arrowhead-pass-${colorId})`}
           />
         );
@@ -203,7 +209,7 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
           />
         );
       case 'curved-run': {
-        const mid: Point = { x: (p1.x + p2.x) / 2 - 5, y: (p1.y + p2.y) / 2 - 5 };
+        const mid: Point = { x: (p1.x + p2.x) / 2 - 4, y: (p1.y + p2.y) / 2 - 4 };
         const pts = [p1, mid, p2];
         return (
           <path
@@ -219,7 +225,7 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
       case 'dribble':
         return (
           <path
-            d={generateWavyPath(p1, p2, 3.5, 1.2)}
+            d={generateWavyPath(p1, p2, markingSize)}
             fill="none"
             stroke={drawingColor}
             strokeWidth={strokeWidth}
@@ -237,11 +243,11 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
             y={y}
             width={w}
             height={h}
-            rx="1"
+            rx="0.8"
             fill={drawingColor}
-            fillOpacity={0.18}
+            fillOpacity={0.12}
             stroke={drawingColor}
-            strokeWidth={strokeWidth * 0.75}
+            strokeWidth={Math.max(0.5, strokeWidth * 0.7)}
             strokeDasharray={dashArray}
           />
         );
@@ -254,9 +260,9 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
             cy={p1.y}
             r={r}
             fill={drawingColor}
-            fillOpacity={0.18}
+            fillOpacity={0.12}
             stroke={drawingColor}
-            strokeWidth={strokeWidth * 0.75}
+            strokeWidth={Math.max(0.5, strokeWidth * 0.7)}
             strokeDasharray={dashArray}
           />
         );
@@ -291,15 +297,13 @@ export const DrawingLayer: React.FC<DrawingLayerProps> = ({
       onPointerUp={handlePointerUp}
       style={{ touchAction: 'none' }}
     >
-      {/* Invisible overlay for capturing events when tool active */}
       {isInteractiveLayer && (
         <rect x="0" y="0" width="100" height="100" fill="transparent" />
       )}
 
-      {/* Live Drawing Preview */}
       {isDrawing && renderLivePreview()}
 
-      {/* Laser Pointer Trail */}
+      {/* Prominent Laser Pointer */}
       {laserPoints.length > 0 && (
         <g className="pointer-events-none">
           {laserPoints.map((pt, i) => {

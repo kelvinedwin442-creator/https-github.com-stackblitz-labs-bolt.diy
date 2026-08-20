@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import {
   Player,
   Ball,
@@ -8,6 +8,7 @@ import {
   TeamConfig,
   DrawingTool,
   Point,
+  MarkingSize,
 } from '../../types/tactics';
 import { PitchMarkings } from './PitchMarkings';
 import { PlayerMarker } from './PlayerMarker';
@@ -26,7 +27,7 @@ interface FootballPitchProps {
   annotations: Annotation[];
   activeTool: DrawingTool;
   drawingColor: string;
-  strokeWidth: number;
+  markingSize?: MarkingSize;
   drawingStyle: 'solid' | 'dashed' | 'dotted' | 'wavy';
   activeZoneText: string;
   selectedPlayerId: string | null;
@@ -56,7 +57,7 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
   annotations,
   activeTool,
   drawingColor,
-  strokeWidth,
+  markingSize = 'small',
   drawingStyle,
   activeZoneText,
   selectedPlayerId,
@@ -77,7 +78,6 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // Dragging state
   const [dragItem, setDragItem] = useState<{
     type: 'player' | 'ball' | 'equipment';
     id: string;
@@ -85,7 +85,6 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
     offsetY: number;
   } | null>(null);
 
-  // Helper to convert screen coordinates to SVG pitch coordinates (0-100 x, 0-100 y)
   const screenToPitch = useCallback((clientX: number, clientY: number): Point | null => {
     if (!svgRef.current) return null;
     const svg = svgRef.current;
@@ -96,7 +95,6 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
     let px = Math.round(svgP.x * 10) / 10;
     let py = Math.round(svgP.y * 10) / 10;
 
-    // Grid snapping if enabled
     if (pitchConfig.snapToGrid) {
       px = Math.round(px / 5) * 5;
       py = Math.round(py / 5) * 5;
@@ -108,7 +106,6 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
     };
   }, [pitchConfig.snapToGrid]);
 
-  // Pointer down on Player
   const handlePlayerPointerDown = (e: React.PointerEvent, player: Player) => {
     if (activeTool !== 'select') return;
     e.stopPropagation();
@@ -129,7 +126,6 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
     }
   };
 
-  // Pointer down on Ball
   const handleBallPointerDown = (e: React.PointerEvent, b: Ball) => {
     if (activeTool !== 'select') return;
     e.stopPropagation();
@@ -150,7 +146,6 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
     }
   };
 
-  // Pointer down on Equipment
   const handleEquipmentPointerDown = (e: React.PointerEvent, eq: Equipment) => {
     if (activeTool !== 'select') return;
     e.stopPropagation();
@@ -171,7 +166,6 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
     }
   };
 
-  // Global Pointer Move for Dragging
   const handlePitchPointerMove = (e: React.PointerEvent) => {
     if (!dragItem || activeTool !== 'select') return;
 
@@ -194,8 +188,7 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
     setDragItem(null);
   };
 
-  // Clear selections on blank pitch click
-  const handlePitchClick = (e: React.MouseEvent) => {
+  const handlePitchClick = () => {
     if (activeTool === 'select') {
       onSelectPlayer(null);
       onSelectBall(false);
@@ -204,7 +197,6 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
     }
   };
 
-  // Determine SVG viewBox based on pitch view
   const getViewBox = (): string => {
     switch (pitchConfig.view) {
       case 'half-left':
@@ -235,22 +227,20 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
         ref={svgRef}
         viewBox={getViewBox()}
         preserveAspectRatio="xMidYMid meet"
-        className="w-full h-full max-h-[84vh] filter drop-shadow-2xl rounded-xl"
+        className="w-full h-full max-h-[88vh] md:max-h-[82vh] filter drop-shadow-2xl rounded-xl transition-all"
         onClick={handlePitchClick}
         style={{ touchAction: 'none' }}
       >
-        {/* Pitch Field Markings and Base */}
         <PitchMarkings config={pitchConfig} />
 
-        {/* Tactical Annotations Layer (Arrows, Zones, Passes) */}
         <TacticalAnnotations
           annotations={annotations}
           selectedAnnotationId={selectedAnnotationId}
+          globalMarkingSize={markingSize}
           onSelectAnnotation={onSelectAnnotation}
           onDeleteAnnotation={onDeleteAnnotation}
         />
 
-        {/* Equipment Markers (Cones, Goals, Poles) */}
         {equipment.map((eq) => (
           <EquipmentMarker
             key={eq.id}
@@ -265,7 +255,6 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
           />
         ))}
 
-        {/* Players Markers */}
         {players.map((player) => {
           const teamConf = player.team === 'home' ? homeTeam : awayTeam;
           return (
@@ -288,7 +277,6 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
           );
         })}
 
-        {/* Ball Marker */}
         <BallMarker
           ball={ball}
           isSelected={isBallSelected}
@@ -300,12 +288,11 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
           }}
         />
 
-        {/* Interactive In-Progress Drawing Layer */}
         {isInteractive && (
           <DrawingLayer
             activeTool={activeTool}
             drawingColor={drawingColor}
-            strokeWidth={strokeWidth}
+            markingSize={markingSize}
             drawingStyle={drawingStyle}
             activeZoneText={activeZoneText}
             onAddAnnotation={onAddAnnotation}

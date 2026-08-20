@@ -9,6 +9,7 @@ import {
   MatchFormat,
   TeamId,
   EquipmentType,
+  MarkingSize,
 } from '../../types/tactics';
 import { FootballPitch } from '../pitch/FootballPitch';
 import { DrawingToolbar } from '../tools/DrawingToolbar';
@@ -22,7 +23,7 @@ import { VideoWorkspacePanel } from '../video/VideoWorkspacePanel';
 import { SessionInfoDrawer } from '../session/SessionInfoDrawer';
 import { createPlayersFromFormation } from '../../data/formations';
 import { lerp, easeInOutCubic } from '../../utils/pitchGeometry';
-import { exportPitchAsPng, downloadOfflineApp } from '../../utils/exportImage';
+import { exportPitchAsPng } from '../../utils/exportImage';
 import {
   ArrowLeft,
   Save,
@@ -31,11 +32,10 @@ import {
   Sliders,
   Maximize2,
   Check,
-  Shield,
   RotateCcw,
-  Sparkles,
   Camera,
-  Download,
+  ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 
 interface TacticalWorkspaceProps {
@@ -56,10 +56,10 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
   const [session, setSession] = useState<Session>(initialSession);
   const [currentStepIndex, setCurrentStepIndex] = useState(session.currentStepIndex || 0);
 
-  // Active Tools & Drawing settings
+  // Active Tools & Drawing settings (Defaulting to small, refined marking size)
   const [activeTool, setActiveTool] = useState<DrawingTool>('select');
   const [drawingColor, setDrawingColor] = useState<string>('#ffffff');
-  const [strokeWidth, setStrokeWidth] = useState<number>(2.5);
+  const [markingSize, setMarkingSize] = useState<MarkingSize>('small');
   const [drawingStyle, setDrawingStyle] = useState<'solid' | 'dashed' | 'dotted' | 'wavy'>('solid');
   const [activeZoneText, setActiveZoneText] = useState<string>('');
 
@@ -91,7 +91,7 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
   const pushHistory = useCallback((newSessionState: Session) => {
     setHistory((prev) => {
       const upToCurrent = prev.slice(0, historyIndex + 1);
-      return [...upToCurrent, newSessionState].slice(-25); // keep last 25 states
+      return [...upToCurrent, newSessionState].slice(-25);
     });
     setHistoryIndex((prev) => Math.min(prev + 1, 24));
   }, [historyIndex]);
@@ -112,14 +112,12 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     }
   }, [history, historyIndex]);
 
-  // Current active step
   const currentStep = session.steps[currentStepIndex] || session.steps[0];
 
   // Animated interpolations
   const [animatedPlayers, setAnimatedPlayers] = useState<Player[]>(currentStep.players);
   const [animatedBall, setAnimatedBall] = useState<Ball>(currentStep.ball);
 
-  // Update animated entities when current step changes or not playing
   useEffect(() => {
     if (!isPlaying) {
       setAnimatedPlayers(currentStep.players);
@@ -127,7 +125,7 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     }
   }, [currentStepIndex, session.steps, isPlaying]);
 
-  // Animation Loop: 60fps interpolation between steps
+  // Animation Loop: 60fps interpolation
   const animationFrameRef = useRef<number | null>(null);
   const animStartTimeRef = useRef<number | null>(null);
 
@@ -156,7 +154,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
 
       setPlaybackProgress(rawProgress);
 
-      // Interpolate players
       const interpolatedPlayers = stepStartPlayers.map((p1) => {
         const p2 = targetPlayers.find((p) => p.id === p1.id || (p.team === p1.team && p.number === p1.number));
         if (!p2) return p1;
@@ -169,7 +166,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
         };
       });
 
-      // Interpolate ball
       const interpolatedBall = {
         ...stepStartBall,
         x: lerp(stepStartBall.x, targetBall.x, easedProgress),
@@ -182,7 +178,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
       if (rawProgress < 1) {
         animationFrameRef.current = requestAnimationFrame(frame);
       } else {
-        // Step finished
         if (nextStepIndex === 0 && !isLooping) {
           setIsPlaying(false);
           setPlaybackProgress(0);
@@ -202,7 +197,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user typing in input or textarea
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
         return;
       }
@@ -256,14 +250,12 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentStepIndex, session.steps.length, handleUndo, handleRedo]);
 
-  // Autosave helper
   const handleSave = () => {
     onSaveSession(session);
     setSavedFeedback(true);
     setTimeout(() => setSavedFeedback(false), 2000);
   };
 
-  // Helper to update current step state
   const updateCurrentStep = (updater: (step: typeof currentStep) => typeof currentStep) => {
     const updatedSteps = [...session.steps];
     const newStep = updater(currentStep);
@@ -277,7 +269,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     pushHistory(newSession);
   };
 
-  // Player Position Update
   const handleUpdatePlayerPosition = (id: string, x: number, y: number) => {
     updateCurrentStep((step) => ({
       ...step,
@@ -285,7 +276,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     }));
   };
 
-  // Ball Position Update
   const handleUpdateBallPosition = (x: number, y: number) => {
     updateCurrentStep((step) => ({
       ...step,
@@ -293,7 +283,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     }));
   };
 
-  // Equipment Position Update
   const handleUpdateEquipmentPosition = (id: string, x: number, y: number) => {
     updateCurrentStep((step) => ({
       ...step,
@@ -301,15 +290,13 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     }));
   };
 
-  // Add Annotation
   const handleAddAnnotation = (ann: Annotation) => {
     updateCurrentStep((step) => ({
       ...step,
-      annotations: [...step.annotations, ann],
+      annotations: [...step.annotations, { ...ann, size: ann.size || markingSize }],
     }));
   };
 
-  // Delete Annotation
   const handleDeleteAnnotation = (id: string) => {
     updateCurrentStep((step) => ({
       ...step,
@@ -318,9 +305,8 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     setSelectedAnnotationId(null);
   };
 
-  // Clear Annotations on Current Step
   const handleClearAnnotations = () => {
-    if (window.confirm('Clear all drawings and tactical annotations on this step?')) {
+    if (window.confirm('Clear all drawings and annotations on this step?')) {
       updateCurrentStep((step) => ({
         ...step,
         annotations: [],
@@ -328,7 +314,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     }
   };
 
-  // Update Player Details
   const handleUpdatePlayerDetails = (updated: Partial<Player>) => {
     if (!selectedPlayerId) return;
     updateCurrentStep((step) => ({
@@ -337,7 +322,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     }));
   };
 
-  // Delete Player
   const handleDeletePlayer = (id: string) => {
     updateCurrentStep((step) => ({
       ...step,
@@ -346,7 +330,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     setSelectedPlayerId(null);
   };
 
-  // Duplicate Player
   const handleDuplicatePlayer = (player: Player) => {
     const newPlayer: Player = {
       ...player,
@@ -362,7 +345,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     setSelectedPlayerId(newPlayer.id);
   };
 
-  // Add Player (From Dropdown)
   const handleAddPlayer = (team: TeamId, role: string, isGK = false) => {
     const existingCount = currentStep.players.filter((p) => p.team === team).length;
     const newPlayer: Player = {
@@ -383,7 +365,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     setSelectedPlayerId(newPlayer.id);
   };
 
-  // Add Equipment (From Dropdown)
   const handleAddEquipment = (type: EquipmentType, label?: string) => {
     const newEq: Equipment = {
       id: `eq-${Date.now()}`,
@@ -399,7 +380,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     setSelectedEquipmentId(newEq.id);
   };
 
-  // Reset Formation
   const handleApplyFormation = (target: 'both' | 'home' | 'away', homeForm: string, awayForm: string) => {
     const fullNewPlayers = createPlayersFromFormation(session.format, homeForm, awayForm);
     let updatedPlayers: Player[];
@@ -428,13 +408,12 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     pushHistory(newSession);
   };
 
-  // Add Step
   const handleAddStep = () => {
     const newStepIndex = session.steps.length;
     const newStep = {
       ...JSON.parse(JSON.stringify(currentStep)),
       id: `step-${Date.now()}`,
-      name: `Step ${newStepIndex + 1}: Tactical Phase`,
+      name: `Step ${newStepIndex + 1}: Move`,
       duration: 2.0,
       annotations: [],
     };
@@ -445,7 +424,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     pushHistory(newSession);
   };
 
-  // Duplicate Step
   const handleDuplicateStep = (index: number) => {
     const original = session.steps[index];
     const dup = {
@@ -461,7 +439,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     pushHistory(newSession);
   };
 
-  // Delete Step
   const handleDeleteStep = (index: number) => {
     if (session.steps.length <= 1) return;
     const updatedSteps = session.steps.filter((_, i) => i !== index);
@@ -471,7 +448,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     pushHistory(newSession);
   };
 
-  // Move Step
   const handleMoveStep = (from: number, to: number) => {
     const updatedSteps = [...session.steps];
     const [moved] = updatedSteps.splice(from, 1);
@@ -482,7 +458,6 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
     pushHistory(newSession);
   };
 
-  // Update Step Name
   const handleUpdateStepName = (index: number, name: string, description?: string) => {
     const updatedSteps = [...session.steps];
     updatedSteps[index] = { ...updatedSteps[index], name, description };
@@ -496,38 +471,69 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between select-none overflow-x-hidden">
       {/* Top Workspace Header Bar */}
-      <header className="bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-30 px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 shadow-md">
+      <header className="bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-30 px-3 sm:px-5 py-2 flex items-center justify-between gap-2 shadow-md">
         {/* Left: Back & Title */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           <button
             onClick={onBackToDashboard}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors flex-shrink-0"
+            className="p-1.5 sm:p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors flex-shrink-0"
             title="Back to Dashboard"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
 
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <h1
                 onClick={() => setShowSessionInfo(true)}
-                className="font-bold text-sm sm:text-base text-white hover:text-emerald-400 cursor-pointer truncate transition-colors max-w-[200px] sm:max-w-md"
+                className="font-bold text-xs sm:text-sm md:text-base text-white hover:text-emerald-400 cursor-pointer truncate transition-colors max-w-[140px] sm:max-w-xs md:max-w-md"
                 title="Click to edit session details"
               >
                 {session.title}
               </h1>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-500/30 flex-shrink-0">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-500/30 flex-shrink-0">
                 {session.format}
               </span>
             </div>
-            <p className="text-[10px] text-slate-400 truncate hidden sm:block">
-              {session.homeTeam.name} ({session.homeTeam.formation}) vs {session.awayTeam.name} ({session.awayTeam.formation})
+            <p className="text-[10px] text-slate-400 truncate hidden md:block">
+              {session.homeTeam.name} vs {session.awayTeam.name}
             </p>
           </div>
         </div>
 
-        {/* Center/Right: Action Buttons */}
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        {/* Center: Simplified Coach Workflow Guide Pill (Hidden on smallest mobile) */}
+        <div className="hidden xl:flex items-center gap-1 bg-slate-950/80 px-3 py-1 rounded-full border border-slate-800 text-[11px] font-medium text-slate-400">
+          <button
+            onClick={() => setActiveTool('select')}
+            className={`hover:text-white transition-colors ${activeTool === 'select' ? 'text-emerald-400 font-bold' : ''}`}
+          >
+            1. Set Up
+          </button>
+          <ChevronRight className="w-3 h-3 text-slate-600" />
+          <button
+            onClick={() => setActiveTool('pass')}
+            className={`hover:text-white transition-colors ${activeTool !== 'select' && activeTool !== 'laser' ? 'text-emerald-400 font-bold' : ''}`}
+          >
+            2. Add Movements
+          </button>
+          <ChevronRight className="w-3 h-3 text-slate-600" />
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className={`hover:text-white transition-colors ${isPlaying ? 'text-emerald-400 font-bold' : ''}`}
+          >
+            3. Animate
+          </button>
+          <ChevronRight className="w-3 h-3 text-slate-600" />
+          <button
+            onClick={() => setShowPresentation(true)}
+            className="hover:text-indigo-400 transition-colors"
+          >
+            4. Present
+          </button>
+        </div>
+
+        {/* Right: Workspace Action Buttons */}
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
           {/* Add Items Dropdown */}
           <AddItemsDropdown
             onAddPlayer={handleAddPlayer}
@@ -537,11 +543,11 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
           {/* Reset Formation Button */}
           <button
             onClick={() => setShowResetModal(true)}
-            className="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-            title="Reset Formations"
+            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold flex items-center gap-1 transition-colors"
+            title="Change Formations"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Formations</span>
+            <span className="hidden lg:inline">Formation</span>
           </button>
 
           {/* Video Workspace Toggle */}
@@ -550,24 +556,24 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
               setShowVideoPanel(!showVideoPanel);
               if (showSessionInfo) setShowSessionInfo(false);
             }}
-            className={`p-2 sm:px-3 sm:py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all ${
+            className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1 transition-all ${
               showVideoPanel
                 ? 'bg-indigo-950 border-indigo-500 text-indigo-300 shadow-glow-blue'
                 : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
             }`}
-            title="Toggle Video Workspace"
+            title="Toggle Video Studio"
           >
             <Video className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="hidden md:inline">Video Studio</span>
+            <span className="hidden xl:inline">Video</span>
           </button>
 
-          {/* Session Notes Drawer Toggle */}
+          {/* Coaching Notes Drawer Toggle */}
           <button
             onClick={() => {
               setShowSessionInfo(!showSessionInfo);
               if (showVideoPanel) setShowVideoPanel(false);
             }}
-            className={`p-2 sm:px-3 sm:py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all ${
+            className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1 transition-all ${
               showSessionInfo
                 ? 'bg-emerald-950 border-emerald-500 text-emerald-300 shadow-glow-green'
                 : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
@@ -575,13 +581,13 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
             title="Session Info & Coaching Cues"
           >
             <FileText className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="hidden lg:inline">Coaching Notes</span>
+            <span className="hidden xl:inline">Notes</span>
           </button>
 
           {/* Pitch Config Toggle */}
           <button
             onClick={() => setShowPitchSettings(!showPitchSettings)}
-            className={`p-2 rounded-lg border text-xs transition-all ${
+            className={`p-1.5 sm:p-2 rounded-lg border text-xs transition-all ${
               showPitchSettings
                 ? 'bg-slate-700 border-emerald-500 text-white'
                 : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
@@ -599,46 +605,46 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
                 exportPitchAsPng(svgEl, session.title, currentStep.name);
               }
             }}
-            className="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold flex items-center gap-1 transition-colors"
             title="Download Tactical Diagram as PNG"
           >
             <Camera className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="hidden md:inline">Export PNG</span>
+            <span className="hidden md:inline">PNG</span>
           </button>
 
           {/* Presentation Mode Button */}
           <button
             onClick={() => setShowPresentation(true)}
-            className="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all"
             title="Present Fullscreen"
           >
             <Maximize2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Present</span>
+            <span className="hidden md:inline">Present</span>
           </button>
 
           {/* Save Button */}
           <button
             onClick={handleSave}
-            className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-glow-green transition-all"
+            className="px-2.5 py-1.5 sm:px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 shadow-glow-green transition-all"
           >
             {savedFeedback ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{savedFeedback ? 'Saved!' : 'Save'}</span>
+            <span className="hidden sm:inline">{savedFeedback ? 'Saved' : 'Save'}</span>
           </button>
         </div>
       </header>
 
       {/* Main Tactical Working Canvas Area */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto p-2 sm:p-4 flex flex-col gap-2.5 relative">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto p-1.5 sm:p-3 flex flex-col gap-2 relative">
         {/* Drawing Toolbar directly above the pitch */}
         <DrawingToolbar
           activeTool={activeTool}
           onSelectTool={setActiveTool}
           drawingColor={drawingColor}
           onChangeColor={setDrawingColor}
+          markingSize={markingSize}
+          onChangeMarkingSize={setMarkingSize}
           drawingStyle={drawingStyle}
           onChangeStyle={setDrawingStyle}
-          strokeWidth={strokeWidth}
-          onChangeStrokeWidth={setStrokeWidth}
           activeZoneText={activeZoneText}
           onChangeZoneText={setActiveZoneText}
           canUndo={historyIndex > 0}
@@ -653,9 +659,9 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
         />
 
         {/* Pitch Container & Side Panels Grid */}
-        <div className="flex-1 flex flex-col lg:flex-row items-stretch gap-3 min-h-[460px] relative">
+        <div className="flex-1 flex flex-col lg:flex-row items-stretch gap-2.5 min-h-[420px] relative">
           {/* Main Pitch Field */}
-          <div className="flex-1 bg-slate-900/60 border border-slate-800 rounded-2xl p-2 sm:p-4 flex items-center justify-center relative overflow-hidden shadow-tactical">
+          <div className="flex-1 bg-slate-900/60 border border-slate-800 rounded-2xl p-1 sm:p-3 flex items-center justify-center relative overflow-hidden shadow-tactical">
             <FootballPitch
               pitchConfig={session.pitchConfig}
               homeTeam={session.homeTeam}
@@ -666,7 +672,7 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
               annotations={currentStep.annotations || []}
               activeTool={activeTool}
               drawingColor={drawingColor}
-              strokeWidth={strokeWidth}
+              markingSize={markingSize}
               drawingStyle={drawingStyle}
               activeZoneText={activeZoneText}
               selectedPlayerId={selectedPlayerId}
@@ -707,7 +713,7 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
 
             {/* Floating Player Inspector Widget */}
             {selectedPlayer && !isPlaying && (
-              <div className="absolute top-4 right-4 z-20">
+              <div className="absolute top-3 right-3 z-20">
                 <PlayerInspector
                   player={selectedPlayer}
                   teamConfig={selectedPlayer.team === 'home' ? session.homeTeam : session.awayTeam}
@@ -720,96 +726,96 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
             )}
           </div>
 
-            {/* Pitch Settings Slide-over Drawer */}
-            {showPitchSettings && (
-              <div className="w-full lg:w-72 flex-shrink-0 animate-slide-up">
-                <PitchSettingsPanel
-                  format={session.format}
-                  onChangeFormat={(f) => {
-                    setSession((prev) => ({ ...prev, format: f }));
-                    setShowResetModal(true);
-                  }}
-                  pitchConfig={session.pitchConfig}
-                  onChangePitchConfig={(cfg) => {
-                    setSession((prev) => ({
-                      ...prev,
-                      pitchConfig: { ...prev.pitchConfig, ...cfg },
-                    }));
-                  }}
-                  homeTeam={session.homeTeam}
-                  awayTeam={session.awayTeam}
-                  onUpdateHomeTeam={(t) => {
-                    setSession((prev) => ({
-                      ...prev,
-                      homeTeam: { ...prev.homeTeam, ...t },
-                    }));
-                  }}
-                  onUpdateAwayTeam={(t) => {
-                    setSession((prev) => ({
-                      ...prev,
-                      awayTeam: { ...prev.awayTeam, ...t },
-                    }));
-                  }}
-                  onOpenResetModal={() => setShowResetModal(true)}
-                />
-              </div>
-            )}
+          {/* Pitch Settings Slide-over Drawer */}
+          {showPitchSettings && (
+            <div className="w-full lg:w-72 flex-shrink-0 animate-slide-up">
+              <PitchSettingsPanel
+                format={session.format}
+                onChangeFormat={(f) => {
+                  setSession((prev) => ({ ...prev, format: f }));
+                  setShowResetModal(true);
+                }}
+                pitchConfig={session.pitchConfig}
+                onChangePitchConfig={(cfg) => {
+                  setSession((prev) => ({
+                    ...prev,
+                    pitchConfig: { ...prev.pitchConfig, ...cfg },
+                  }));
+                }}
+                homeTeam={session.homeTeam}
+                awayTeam={session.awayTeam}
+                onUpdateHomeTeam={(t) => {
+                  setSession((prev) => ({
+                    ...prev,
+                    homeTeam: { ...prev.homeTeam, ...t },
+                  }));
+                }}
+                onUpdateAwayTeam={(t) => {
+                  setSession((prev) => ({
+                    ...prev,
+                    awayTeam: { ...prev.awayTeam, ...t },
+                  }));
+                }}
+                onOpenResetModal={() => setShowResetModal(true)}
+              />
+            </div>
+          )}
 
-            {/* Video Side Panel */}
-            {showVideoPanel && (
-              <div className="w-full lg:w-[450px] flex-shrink-0 animate-slide-up">
-                <VideoWorkspacePanel
-                  videoUrl={session.videoUrl}
-                  videoFileName={session.videoFileName}
-                  bookmarks={session.videoBookmarks || []}
-                  currentStepIndex={currentStepIndex}
-                  steps={session.steps}
-                  onSetVideo={(url, fileName) => {
-                    setSession((prev) => ({
-                      ...prev,
-                      videoUrl: url,
-                      videoFileName: fileName,
-                    }));
-                  }}
-                  onAddBookmark={(time, label, stepId) => {
-                    const newBm = {
-                      id: `bm-${Date.now()}`,
-                      time,
-                      label,
-                      stepId,
-                    };
-                    setSession((prev) => ({
-                      ...prev,
-                      videoBookmarks: [...(prev.videoBookmarks || []), newBm],
-                    }));
-                  }}
-                  onDeleteBookmark={(id) => {
-                    setSession((prev) => ({
-                      ...prev,
-                      videoBookmarks: (prev.videoBookmarks || []).filter((b) => b.id !== id),
-                    }));
-                  }}
-                  onStepSelect={setCurrentStepIndex}
-                  onClose={() => setShowVideoPanel(false)}
-                />
-              </div>
-            )}
+          {/* Video Side Panel */}
+          {showVideoPanel && (
+            <div className="w-full lg:w-[440px] flex-shrink-0 animate-slide-up">
+              <VideoWorkspacePanel
+                videoUrl={session.videoUrl}
+                videoFileName={session.videoFileName}
+                bookmarks={session.videoBookmarks || []}
+                currentStepIndex={currentStepIndex}
+                steps={session.steps}
+                onSetVideo={(url, fileName) => {
+                  setSession((prev) => ({
+                    ...prev,
+                    videoUrl: url,
+                    videoFileName: fileName,
+                  }));
+                }}
+                onAddBookmark={(time, label, stepId) => {
+                  const newBm = {
+                    id: `bm-${Date.now()}`,
+                    time,
+                    label,
+                    stepId,
+                  };
+                  setSession((prev) => ({
+                    ...prev,
+                    videoBookmarks: [...(prev.videoBookmarks || []), newBm],
+                  }));
+                }}
+                onDeleteBookmark={(id) => {
+                  setSession((prev) => ({
+                    ...prev,
+                    videoBookmarks: (prev.videoBookmarks || []).filter((b) => b.id !== id),
+                  }));
+                }}
+                onStepSelect={setCurrentStepIndex}
+                onClose={() => setShowVideoPanel(false)}
+              />
+            </div>
+          )}
 
-            {/* Session Info / Coaching Points Drawer */}
-            {showSessionInfo && (
-              <div className="w-full lg:w-[380px] flex-shrink-0 animate-slide-up">
-                <SessionInfoDrawer
-                  session={session}
-                  onUpdateSession={(updated) => {
-                    setSession((prev) => ({ ...prev, ...updated }));
-                  }}
-                  onSaveSession={handleSave}
-                  onExportJson={() => onExportJson(session)}
-                  onDuplicateSession={() => onDuplicateSession(session.id)}
-                  onClose={() => setShowSessionInfo(false)}
-                />
-              </div>
-            )}
+          {/* Session Info / Coaching Points Drawer */}
+          {showSessionInfo && (
+            <div className="w-full lg:w-[380px] flex-shrink-0 animate-slide-up">
+              <SessionInfoDrawer
+                session={session}
+                onUpdateSession={(updated) => {
+                  setSession((prev) => ({ ...prev, ...updated }));
+                }}
+                onSaveSession={handleSave}
+                onExportJson={() => onExportJson(session)}
+                onDuplicateSession={() => onDuplicateSession(session.id)}
+                onClose={() => setShowSessionInfo(false)}
+              />
+            </div>
+          )}
         </div>
 
         {/* Bottom Animation Timeline Bar */}
