@@ -15,7 +15,12 @@ import {
   MousePointer,
   ArrowRight,
   Maximize2,
+  Mic,
+  Share2,
+  ListChecks,
+  Users,
 } from 'lucide-react';
+import { DRILLS } from '../../data/drills';
 
 interface DashboardProps {
   sessions: Session[];
@@ -26,6 +31,8 @@ interface DashboardProps {
   onExportSession: (session: Session) => void;
   onExportAll: () => void;
   onImportSession: (file: File) => void;
+  /** opens the offline drill library / coach log surface */
+  onOpenKit: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -37,6 +44,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onExportSession,
   onExportAll,
   onImportSession,
+  onOpenKit,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFormat, setSelectedFormat] = useState<string>('all');
@@ -159,6 +167,61 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col gap-6">
+        {/* Coach Kit — the offline drill library surface for a real training night */}
+        <section className="relative overflow-hidden rounded-2xl border border-emerald-800/70 bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950 p-4 sm:p-5 shadow-tactical">
+          <div className="absolute -right-8 -top-10 w-40 h-40 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
+          <div className="relative flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-300 bg-emerald-500/15 border border-emerald-700/60 px-2 py-0.5 rounded-full">
+                  Coach Kit
+                </span>
+                <span className="text-[10px] text-slate-400">free · works offline · nothing uploaded</span>
+              </div>
+              <h2 className="mt-2 text-lg sm:text-2xl font-display font-extrabold text-white leading-tight">
+                {DRILLS.length} ready drills for the pitch you actually have
+              </h2>
+              <p className="mt-1 text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                One ball between two players. No cones. Thirty children, half a pitch, hot sun. Filter by what is
+                real tonight, tap a drill, see it move, then send the picture to your assistant on WhatsApp.
+              </p>
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                {[
+                  { icon: BookOpen, label: 'Drill library' },
+                  { icon: Mic, label: 'Voice cues' },
+                  { icon: Share2, label: 'WhatsApp card' },
+                  { icon: ListChecks, label: 'Session log' },
+                  { icon: Users, label: 'Girls & disability packs' },
+                ].map((chip) => (
+                  <span
+                    key={chip.label}
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-300 bg-slate-950/60 border border-slate-700/70 rounded-full px-2 py-1"
+                  >
+                    <chip.icon className="w-3 h-3 text-emerald-400" />
+                    {chip.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="flex md:flex-col gap-2 md:w-56 flex-shrink-0">
+              <button
+                onClick={onOpenKit}
+                className="flex-1 md:flex-none px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 text-sm font-extrabold flex items-center justify-center gap-2 shadow-glow-green transition-all"
+              >
+                <BookOpen className="w-4 h-4" />
+                Open Coach Kit
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onCreateNewSession('7v7', '7v7 Session')}
+                className="flex-1 md:flex-none px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center justify-center gap-1.5"
+              >
+                Or start blank
+              </button>
+            </div>
+          </div>
+        </section>
+
         {/* Simple 4-Step Coaching Workflow Banner */}
         <div className="bg-slate-900/60 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-tactical">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

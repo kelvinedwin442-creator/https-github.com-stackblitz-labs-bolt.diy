@@ -4,12 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Tactical Coach — Modern Football Tactics & Coaching Studio</title>
-    <meta name="description" content="Professional football coaching workspace to create, demonstrate, save, and present tactics." />
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Tactical Coach — Coach Kit (offline football coaching board)</title>
+    <meta
+      name="description"
+      content="Free offline football coaching workspace: build, animate and present tactics, share drill cards on WhatsApp. No account, nothing uploaded."
+    />
+    <!--
+      No web fonts on purpose. This app has to open instantly on a phone at a training
+      ground with no signal, and it is also distributed as a single HTML file over WhatsApp.
+      Any external request is a way for it to fail.
+    -->
+    <meta name="theme-color" content="#0b1220" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Coach Kit" />
+    <link rel="manifest" href="/manifest.webmanifest" />
   </head>
   <body class="bg-slate-950 text-slate-100 antialiased selection:bg-emerald-500 selection:text-white overflow-x-hidden min-h-screen">
     <div id="root"></div>

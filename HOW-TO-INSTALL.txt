@@ -1,0 +1,19 @@
+HOW TO INSTALL COACH KIT (offline football coaching board)
+
+1. Save coach_kit.html - it is one file, under 500 kB.
+   From a running copy: open /coach_kit.html, or in the app go to Coach Kit > Get it on your phone.
+2. Send that file to each phone: WhatsApp document, or Xender/ShareIt phone to phone.
+3. On the phone: open the file in Chrome, then menu > Add to home screen.
+4. It now works like an app with no internet. Nothing is uploaded anywhere; no account, no cost.
+
+If you extracted this ZIP and want to run the full developer version:
+  npm install
+  npm run build
+  node bundle-single-file.cjs   (writes the standalone file)
+  node server.cjs               (serves the app on :5173 and :3000)
+
+Drill content lives in src/data/drills.ts. Each drill is plain data - age band, minutes,
+area, balls, the improvised-equipment line, 2-3 animated steps and the sentences to say.
+Add your own local drills there; no engine changes needed.
+
+Free to copy, translate and reprint. Made for grassroots coach education.

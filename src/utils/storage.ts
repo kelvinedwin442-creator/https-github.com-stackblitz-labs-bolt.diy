@@ -1,6 +1,7 @@
 import { Session, MatchFormat, KeyframeStep } from '../types/tactics';
 import { DEFAULT_SESSIONS } from '../data/defaultSessions';
 import { createPlayersFromFormation } from '../data/formations';
+import { mirrorToIndexedDB } from './sessionMirror';
 
 const STORAGE_KEY = 'tactical_coach_sessions_v1';
 const ACTIVE_SESSION_ID_KEY = 'tactical_coach_active_session_id_v1';
@@ -29,6 +30,9 @@ export function saveSessions(sessions: Session[]): void {
   } catch (err) {
     console.error('Failed to save sessions to storage:', err);
   }
+  // Mirror to IndexedDB so a cleared cache or a browser storage purge does not erase a
+  // season of work. localStorage is the fast path, the mirror is the safety net.
+  void mirrorToIndexedDB(sessions);
 }
 
 export function getSessionById(id: string): Session | undefined {

@@ -191,9 +191,10 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
 
         {/* Right: Speed & Add Step */}
         <div className="flex items-center gap-1.5">
-          {/* Speed Buttons */}
-          <div className="flex items-center bg-slate-950/80 rounded-lg p-0.5 border border-slate-800">
-            {[0.5, 1, 1.5].map((s) => (
+          {/* Speed Buttons — 0.25x exists because "show me the movement again, slower"
+              is the single most common request from a player who missed it at full pace */}
+          <div className="flex items-center bg-slate-950/80 rounded-lg p-0.5 border border-slate-800 overflow-x-auto">
+            {[0.25, 0.5, 1, 1.5, 2].map((s) => (
               <button
                 key={s}
                 onClick={() => onChangeSpeed(s)}
@@ -203,7 +204,7 @@ export const AnimationTimeline: React.FC<AnimationTimelineProps> = ({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {s}x
+                {s === 0.25 ? '¼×' : `${s}x`}
               </button>
             ))}
           </div>

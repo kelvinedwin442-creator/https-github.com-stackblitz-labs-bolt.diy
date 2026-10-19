@@ -16,6 +16,9 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon',
   '.mp4': 'video/mp4',
   '.zip': 'application/zip',
+  '.webmanifest': 'application/manifest+json',
+  '.txt': 'text/plain; charset=UTF-8',
+  '.woff2': 'font/woff2',
 };
 
 function createTacticalServer(port) {
@@ -37,12 +40,13 @@ function createTacticalServer(port) {
     const parsedUrl = req.url.split('?')[0];
 
     // Direct ZIP Download endpoint
-    if (parsedUrl === '/download/zip' || parsedUrl === '/tactical-coach-mvp.zip') {
-      const zipPath = path.join(ROOT_DIR, 'tactical-coach-mvp.zip');
-      if (fs.existsSync(zipPath)) {
+    if (parsedUrl === '/download/zip' || parsedUrl === '/coach-kit.zip' || parsedUrl === '/tactical-coach-mvp.zip') {
+      const candidates = ['coach-kit.zip', 'tactical-coach-mvp.zip'].map((f) => path.join(ROOT_DIR, f));
+      const zipPath = candidates.find((f) => fs.existsSync(f));
+      if (zipPath) {
         res.writeHead(200, {
           'Content-Type': 'application/zip',
-          'Content-Disposition': 'attachment; filename="tactical-coach-mvp.zip"',
+          'Content-Disposition': `attachment; filename="${path.basename(zipPath)}"`,
           'Content-Length': fs.statSync(zipPath).size,
         });
         fs.createReadStream(zipPath).pipe(res);
@@ -57,6 +61,20 @@ function createTacticalServer(port) {
         res.writeHead(200, {
           'Content-Type': 'text/html; charset=UTF-8',
           'Content-Disposition': parsedUrl.includes('download') ? 'attachment; filename="Tactical_Coach_Offline_App.html"' : 'inline',
+        });
+        fs.createReadStream(htmlPath).pipe(res);
+        return;
+      }
+    }
+
+    // The standalone app under the name coaches actually forward on WhatsApp
+    if (parsedUrl === '/coach_kit.html') {
+      const htmlPath = path.join(ROOT_DIR, 'tactical_coach_preview.html');
+      if (fs.existsSync(htmlPath)) {
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=UTF-8',
+          'Content-Disposition': 'attachment; filename="coach_kit.html"',
+          'Content-Length': fs.statSync(htmlPath).size,
         });
         fs.createReadStream(htmlPath).pipe(res);
         return;
@@ -155,16 +173,19 @@ function createTacticalServer(port) {
 </head>
 <body>
   <div class="card">
-    <div class="badge">TACTICAL COACH MVP</div>
-    <h1>Download Studio Deliverables</h1>
-    <p>Get the complete tactical coaching studio to run offline or integrate into your coaching setup.</p>
-    
-    <a href="/download/zip" class="btn btn-primary">
-      📦 Download Full Project ZIP (.zip)
+    <div class="badge">TACTICAL COACH · COACH KIT</div>
+    <h1>Take it to the pitch</h1>
+    <p>
+      The offline app is one HTML file — save it, then forward it to every coach on WhatsApp or
+      Xender. No internet, no account, no cost. The ZIP has the full project and the built site.
+    </p>
+
+    <a href="/coach_kit.html" class="btn btn-primary">
+      ⚡ Download the offline app (coach_kit.html)
     </a>
 
-    <a href="/download/html" class="btn btn-secondary">
-      ⚡ Download Standalone Offline App (.html)
+    <a href="/download/zip" class="btn btn-secondary">
+      📦 Download full project ZIP (.zip)
     </a>
 
     <a href="/" class="btn btn-secondary" style="border-color: transparent; color: #94a3b8;">

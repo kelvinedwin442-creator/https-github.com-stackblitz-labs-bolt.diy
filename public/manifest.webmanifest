@@ -1,0 +1,25 @@
+{
+  "name": "Tactical Coach — Coach Kit",
+  "short_name": "Coach Kit",
+  "description": "Offline football coaching board: drills, animation, presentation and WhatsApp share cards. No account, nothing uploaded.",
+  "id": "coach-kit",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "categories": ["sports", "education", "productivity"],
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Open Coach Kit drills",
+      "short_name": "Drills",
+      "url": "./?view=kit"
+    }
+  ]
+}

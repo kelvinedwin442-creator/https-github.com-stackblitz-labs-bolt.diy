@@ -283,9 +283,13 @@ export const VideoWorkspacePanel: React.FC<VideoWorkspacePanelProps> = ({
             <span>Select Local Video</span>
           </button>
 
-          {/* Quick Demo Clips */}
+          {/* Quick Demo Clips — the only screen in the app that reaches the internet */}
           <div className="mt-2 pt-3 border-t border-slate-800/80 w-full">
-            <p className="text-[11px] text-slate-400 mb-2">Or try a sample coaching clip:</p>
+            <p className="text-[11px] text-slate-400 mb-2">
+              {typeof navigator !== 'undefined' && navigator.onLine === false
+                ? 'You are offline: sample clips need a connection. Use “Select Local Video” with a file on this phone.'
+                : 'Or try a sample clip (this is the one part that needs internet — everything else works offline):'}
+            </p>
             <div className="flex flex-col gap-1.5">
               {SAMPLE_VIDEOS.map((sample, i) => (
                 <button

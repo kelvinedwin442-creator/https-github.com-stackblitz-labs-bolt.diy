@@ -150,6 +150,33 @@ export interface VideoBookmark {
   stepId?: string;
 }
 
+/** Coach Kit metadata: everything that came from the drill library. Optional so
+ *  classic freeform sessions keep working exactly as before. */
+export interface KitCue {
+  cue: string;
+  cuePcm?: string;
+}
+
+export interface KitMeta {
+  drillId: string;
+  minutes: number;
+  players: string;
+  space: string;
+  balls: string;
+  makeshift: string;
+  safety?: string;
+  cues: KitCue[];
+}
+
+export type AgeGroup =
+  | 'U6-U8'
+  | 'U9-U11'
+  | 'U12-U14'
+  | 'U15-U17'
+  | 'Adult'
+  | 'Amputee'
+  | 'Blind';
+
 export interface Session {
   id: string;
   title: string;
@@ -157,6 +184,12 @@ export interface Session {
   format: MatchFormat;
   phase: TacticalPhase;
   category: string;
+  /** set when the session was created from the Coach Kit drill library */
+  drillId?: string;
+  ageGroup?: AgeGroup;
+  /** persisted marking size so a huddle session opens huddle-sized next time */
+  markingSize?: MarkingSize;
+  kitMeta?: KitMeta;
   homeTeam: TeamConfig;
   awayTeam: TeamConfig;
   steps: KeyframeStep[];

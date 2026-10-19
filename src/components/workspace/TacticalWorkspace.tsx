@@ -24,6 +24,10 @@ import { SessionInfoDrawer } from '../session/SessionInfoDrawer';
 import { createPlayersFromFormation } from '../../data/formations';
 import { lerp, easeInOutCubic } from '../../utils/pitchGeometry';
 import { exportPitchAsPng } from '../../utils/exportImage';
+import { defaultMarkingSize, useKitSettings } from '../../utils/kitSettings';
+import { CueRecorder } from '../kit/CueRecorder';
+import { cueKeyForSession } from '../../utils/voiceNotes';
+import { addLog } from '../../utils/coachLog';
 import {
   ArrowLeft,
   Save,
@@ -36,6 +40,8 @@ import {
   Camera,
   ChevronRight,
   Sparkles,
+  ListChecks,
+  Info,
 } from 'lucide-react';
 
 interface TacticalWorkspaceProps {
@@ -59,7 +65,12 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
   // Active Tools & Drawing settings (Defaulting to small, refined marking size)
   const [activeTool, setActiveTool] = useState<DrawingTool>('select');
   const [drawingColor, setDrawingColor] = useState<string>('#ffffff');
-  const [markingSize, setMarkingSize] = useState<MarkingSize>('small');
+  // Opens huddle-sized (big markings) when the coach is working in front of players on a
+  // phone, and fine-sized when they are prepping on a laptop or projector.
+  const [kitSettings] = useKitSettings();
+  const [markingSize, setMarkingSize] = useState<MarkingSize>(
+    () => initialSession.markingSize ?? defaultMarkingSize()
+  );
   const [drawingStyle, setDrawingStyle] = useState<'solid' | 'dashed' | 'dotted' | 'wavy'>('solid');
   const [activeZoneText, setActiveZoneText] = useState<string>('');
 
@@ -76,6 +87,7 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
   const [showResetModal, setShowResetModal] = useState(false);
   const [showPresentation, setShowPresentation] = useState(false);
   const [savedFeedback, setSavedFeedback] = useState(false);
+  const [logFlash, setLogFlash] = useState(false);
 
   // Animation Playback Engine state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -642,7 +654,10 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
           drawingColor={drawingColor}
           onChangeColor={setDrawingColor}
           markingSize={markingSize}
-          onChangeMarkingSize={setMarkingSize}
+          onChangeMarkingSize={(nextSize) => {
+            setMarkingSize(nextSize);
+            setSession((prev) => ({ ...prev, markingSize: nextSize }));
+          }}
           drawingStyle={drawingStyle}
           onChangeStyle={setDrawingStyle}
           activeZoneText={activeZoneText}
@@ -657,6 +672,56 @@ export const TacticalWorkspace: React.FC<TacticalWorkspaceProps> = ({
             if (selectedAnnotationId) handleDeleteAnnotation(selectedAnnotationId);
           }}
         />
+
+          {/* Pitch-side cue strip: the one sentence to say out loud, recordable on the spot */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 bg-slate-900/80 border border-slate-800 rounded-xl px-2.5 py-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-[9px] uppercase tracking-widest text-slate-500 font-extrabold">
+                Say this · step {currentStepIndex + 1} of {session.steps.length}
+              </p>
+              <p
+                className={`font-display font-extrabold text-emerald-400 leading-tight ${
+                  markingSize === 'large' ? 'text-xl sm:text-2xl' : markingSize === 'medium' ? 'text-lg sm:text-xl' : 'text-base sm:text-lg'
+                }`}
+              >
+                {currentStep.description || 'Add the sentence you will say (Notes), so the board speaks for you'}
+              </p>
+              {session.kitMeta?.cues?.[currentStepIndex]?.cuePcm && kitSettings.showPidginCues && (
+                <p className="mt-0.5 text-[11px] font-semibold text-amber-300/90">
+                  “{session.kitMeta.cues[currentStepIndex].cuePcm}”
+                </p>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <CueRecorder storeKey={cueKeyForSession(session.id, currentStepIndex)} script={currentStep.description} compact />
+              <button
+                onClick={() => {
+                  addLog({
+                    date: new Date().toISOString(),
+                    drillId: session.drillId,
+                    title: session.title,
+                    band: session.ageGroup,
+                    minutes: session.kitMeta?.minutes ?? 45,
+                    players: currentStep.players.length,
+                    note: `${session.format} · ${session.steps.length} steps`,
+                  });
+                  setLogFlash(true);
+                  window.setTimeout(() => setLogFlash(false), 2200);
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-bold flex items-center gap-1.5"
+                title="Count this session in your coach log (stays on this phone)"
+              >
+                <ListChecks className="w-3.5 h-3.5 text-emerald-400" />
+                {logFlash ? 'Logged' : 'I ran it'}
+              </button>
+              {session.kitMeta && (
+                <span className="text-[10px] text-slate-500 flex items-center gap-1" title={session.kitMeta.space}>
+                  <Info className="w-3 h-3" />
+                  {session.kitMeta.balls}
+                </span>
+              )}
+            </div>
+          </div>
 
         {/* Pitch Container & Side Panels Grid */}
         <div className="flex-1 flex flex-col lg:flex-row items-stretch gap-2.5 min-h-[420px] relative">

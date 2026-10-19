@@ -49,10 +49,15 @@ export default {
           gold: '#f59e0b',
         }
       },
+      /*
+       * System fonts only — deliberate. Grassroots coaches open this on cheap Android
+       * devices, sometimes with no network at all, and as a single HTML file shared on
+       * WhatsApp. A webfont request is a point of failure we cannot afford.
+       */
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-        display: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+        display: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
       boxShadow: {
         'tactical': '0 4px 20px -2px rgba(0, 0, 0, 0.35)',
