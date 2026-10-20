@@ -72,7 +72,7 @@ export function exportPitchAsPng(
 export function downloadOfflineApp(): void {
   // Fetches tactical_coach_preview.html or serves the standalone bundle
   const a = document.createElement('a');
-  a.href = '/coach_kit.html';
+  a.href = './coach_kit.html';
   a.download = 'coach_kit.html';
   document.body.appendChild(a);
   a.click();

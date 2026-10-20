@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  // Relative asset URLs: the same build has to work when served from a root, from a
+  // sub-path like https://user.github.io/repo/, and as one file inside WhatsApp.
+  base: './',
   plugins: [react()],
   resolve: {
     alias: {

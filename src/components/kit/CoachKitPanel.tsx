@@ -631,7 +631,7 @@ const PhoneTab: React.FC<{ lang: Parameters<typeof t>[0]; academyName: string; o
 
   const saveFile = () => {
     const a = document.createElement('a');
-    a.href = '/coach_kit.html';
+    a.href = './coach_kit.html';
     a.download = 'coach_kit.html';
     document.body.appendChild(a);
     a.click();
@@ -641,7 +641,7 @@ const PhoneTab: React.FC<{ lang: Parameters<typeof t>[0]; academyName: string; o
 
   const forwardApp = async () => {
     try {
-      const res = await fetch('/coach_kit.html').catch(() => fetch('/tactical_coach_preview.html'));
+      const res = await fetch('./coach_kit.html').catch(() => fetch('./tactical_coach_preview.html'));
       const blob = await res.blob();
       const file = new File([blob], 'coach_kit.html', { type: 'text/html' });
       const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
